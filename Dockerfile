@@ -1,39 +1,32 @@
-# Use an official Python image as a base
-FROM python:3.11-slim
-RUN apt-get update && \
-    apt-get install -y curl ca-certificates git tesseract-ocr ffmpeg && \
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get install -y nodejs && \
-    npm install -g prettier@3.4.2 && \
-    rm -rf /var/lib/apt/lists/*
+# Stage 1: Python stage - Use official Python image
+FROM python:3.12-slim
 
-    
-
-# Set the working directory inside the container
-
-
-# Copy the project files into the container
-COPY . /app
-COPY funtion_tasks.py /app/
-COPY datagen.py /app/
-RUN apt-get update && apt-get install -y curl && \
-    rm -rf /var/lib/apt/lists/*
-
-ADD https://astral.sh/uv/install.sh /uv-installer.sh
-
-# Run the installer then remove it
-RUN sh /uv-installer.sh && rm /uv-installer.sh
-ENV PATH="/root/.local/bin/:$PATH"
-
-# Install system dependencies for Python packages
+# Set the working directory
 WORKDIR /app
+
+# Install system dependencies for required packages
+RUN apt-get update && apt-get install -y \
+    git \
+    vim \
+    npm \
+    tesseract-ocr \
+    libsqlite3-dev \
+    libglib2.0-0 \
+    libtesseract-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy project files
+COPY . /app
+
+COPY requirements.txt .
+
 # Install Python dependencies
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
+RUN npm install --no-cache-dir prettier@3.4.2
 
-# Expose the port for FastAPI
+# Expose FastAPI port
 EXPOSE 8000
 
-# Run the FastAPI app
-CMD ["uv", "run", "main:app"]
+# Run FastAPI with Uvicorn
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

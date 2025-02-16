@@ -30,7 +30,7 @@ from datagen import (
 )
 
 
-openai_api_base = os.getenv("OPENAI_API_BASE", "https://aiproxy.sanand.workers.dev/openai/v1")
+openai_api_base = os.getenv("OPENAI_API_BASE", "https://aiproxy.sanand.workers.dev/openai/v1/chat/completions")
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
 
